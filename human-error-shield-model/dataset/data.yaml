@@ -1,6 +1,6 @@
 path: D:/Project/human-error-shield-main/human-error-shield-model/dataset
 
-nc: 18
+nc: 19
 
 names:
   0: Person
@@ -21,6 +21,6 @@ names:
   15: boots
   16: no_boots
   17: vest
-test: images/test
+  18: no_vest
 train: images/train
 val: images/val
