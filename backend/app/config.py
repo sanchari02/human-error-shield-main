@@ -5,9 +5,10 @@ WEIGHTS_PATH = (
     Path("D:/")
     / "Project"
     / "human-error-shield-main"
-    / "human-error-shield-model"
+    / "model"
+    / "PPE-detection"
     / "models"
-    / "safety_detector_v13"
+    / "safety_detector_v17"
     / "weights"
     / "best.pt"
 )
@@ -18,7 +19,7 @@ IMG_SIZE = 640
 import yaml
 
 # Load class names dynamically from data.yaml
-DATA_YAML_PATH = PROJECT_ROOT / "human-error-shield-model" / "dataset" / "data.yaml"
+DATA_YAML_PATH = PROJECT_ROOT / "model" / "PPE-detection" / "dataset" / "data.yaml"
 with open(DATA_YAML_PATH, 'r') as f:
     data_yaml = yaml.safe_load(f)
 CLASS_NAMES = list(data_yaml['names'].values())
