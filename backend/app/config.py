@@ -8,7 +8,7 @@ WEIGHTS_PATH = (
     / "model"
     / "PPE-detection"
     / "models"
-    / "safety_detector_v17"
+    / "safety_detector_v19"
     / "weights"
     / "best.pt"
 )
