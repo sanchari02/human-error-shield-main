@@ -1,24 +1,34 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
-import { Calendar, Filter, Download, Search, AlertTriangle, CheckCircle, Eye } from 'lucide-react';
+import { Calendar, Filter, Download, Search, AlertTriangle, CheckCircle, Eye, X } from 'lucide-react';
 
 export default function History() {
-  // Mock Data for demonstration
-  const historyLogs = [
-    { id: 1, time: '10:42 AM', date: 'Oct 24, 2024', camera: 'Cam-01 (Main Gate)', risk: 'High', details: 'Missing Helmet Detected', image: 'preview1.jpg' },
-    { id: 2, time: '10:38 AM', date: 'Oct 24, 2024', camera: 'Cam-03 (Warehouse)', risk: 'Safe', details: 'Full PPE Compliance', image: 'preview2.jpg' },
-    { id: 3, time: '09:15 AM', date: 'Oct 24, 2024', camera: 'Cam-02 (Assembly)', risk: 'Warning', details: 'Vest not fully secured', image: 'preview3.jpg' },
-    { id: 4, time: '08:55 AM', date: 'Oct 24, 2024', camera: 'Cam-01 (Main Gate)', risk: 'High', details: 'Unauthorized zone entry', image: 'preview4.jpg' },
-    { id: 5, time: '04:30 PM', date: 'Oct 23, 2024', camera: 'Cam-04 (Loading)', risk: 'Safe', details: 'Routine Check', image: 'preview5.jpg' },
-  ];
+  const [historyLogs, setHistoryLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState(null); // State for the evidence modal
+
+  // Your FastAPI backend URL
+  const BACKEND_URL = "http://127.0.0.1:8000";
+
+  useEffect(() => {
+    // Fetch real data from backend
+    fetch(`${BACKEND_URL}/api/history`)
+      .then(res => res.json())
+      .then(data => {
+        setHistoryLogs(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Failed to fetch history:", err);
+        setLoading(false);
+      });
+  }, []);
 
   return (
     <div className="flex h-screen bg-gray-900 text-gray-100 font-sans overflow-hidden">
       <Sidebar />
       
-      {/* Main Scrollable Content */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         {/* --- Header --- */}
         <header className="px-8 py-6 bg-gray-900 border-b border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
           <div>
@@ -30,7 +40,6 @@ export default function History() {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Search Bar */}
             <div className="relative">
               <Search className="absolute left-3 top-2.5 text-gray-500" size={16} />
               <input 
@@ -64,41 +73,65 @@ export default function History() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-700">
-                {historyLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-gray-700/30 transition-colors group">
-                    <td className="px-6 py-4">
-                      <div className="text-white font-medium">{log.time}</div>
-                      <div className="text-gray-500 text-xs">{log.date}</div>
-                    </td>
-                    <td className="px-6 py-4 text-gray-300">
-                      {log.camera}
-                    </td>
-                    <td className="px-6 py-4">
-                      <RiskBadge status={log.risk} />
-                    </td>
-                    <td className="px-6 py-4 text-gray-300">
-                      {log.details}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button className="text-brand-primary hover:text-white text-sm font-medium hover:underline flex items-center justify-end gap-1 opacity-80 hover:opacity-100 transition">
-                        View Evidence <Eye size={14} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {loading ? (
+                  <tr><td colSpan="5" className="text-center py-8 text-gray-500">Loading history...</td></tr>
+                ) : historyLogs.length === 0 ? (
+                  <tr><td colSpan="5" className="text-center py-8 text-gray-500">No incidents recorded yet.</td></tr>
+                ) : (
+                  historyLogs.map((log) => (
+                    <tr key={log.id} className="hover:bg-gray-700/30 transition-colors group">
+                      <td className="px-6 py-4">
+                        <div className="text-white font-medium">{log.time}</div>
+                        <div className="text-gray-500 text-xs">{log.date}</div>
+                      </td>
+                      <td className="px-6 py-4 text-gray-300">
+                        {log.camera}
+                      </td>
+                      <td className="px-6 py-4">
+                        <RiskBadge status={log.risk} />
+                      </td>
+                      <td className="px-6 py-4 text-gray-300">
+                        {log.details}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        {log.image && (
+                          <button 
+                            onClick={() => setSelectedImage(`${BACKEND_URL}/incidents/${log.image}`)}
+                            className="text-brand-primary hover:text-white text-sm font-medium hover:underline flex items-center justify-end gap-1 opacity-80 hover:opacity-100 transition ml-auto"
+                          >
+                            View Evidence <Eye size={14} />
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
-            
-            {/* Pagination Footer */}
-            <div className="px-6 py-4 border-t border-gray-700 bg-gray-900/30 flex items-center justify-between">
-              <span className="text-sm text-gray-500">Showing 1-5 of 128 incidents</span>
-              <div className="flex gap-2">
-                <button className="px-3 py-1 rounded-lg border border-gray-700 text-gray-400 hover:bg-gray-700 hover:text-white text-sm transition">Previous</button>
-                <button className="px-3 py-1 rounded-lg border border-gray-700 text-gray-400 hover:bg-gray-700 hover:text-white text-sm transition">Next</button>
-              </div>
-            </div>
           </div>
         </div>
+
+        {/* --- Evidence Modal --- */}
+        {selectedImage && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-8">
+            <div className="bg-gray-900 border border-gray-700 p-4 rounded-2xl shadow-2xl max-w-4xl w-full relative">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-white">Incident Evidence</h3>
+                <button 
+                  onClick={() => setSelectedImage(null)}
+                  className="p-1 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+              <img 
+                src={selectedImage} 
+                alt="Incident Evidence" 
+                className="w-full h-auto max-h-[70vh] object-contain rounded-lg border border-gray-800"
+              />
+            </div>
+          </div>
+        )}
 
       </main>
     </div>
@@ -119,10 +152,13 @@ const RiskBadge = ({ status }) => {
     Safe: <CheckCircle size={14} />
   };
 
+  // Capitalize first letter just in case
+  const safeStatus = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+
   return (
-    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${styles[status] || styles.Safe}`}>
-      {icons[status]}
-      {status} Risk
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${styles[safeStatus] || styles.Safe}`}>
+      {icons[safeStatus] || icons.Safe}
+      {safeStatus} Risk
     </span>
   );
 };
