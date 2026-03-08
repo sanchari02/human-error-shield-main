@@ -108,15 +108,15 @@ class YOLOService:
     def check_overlap(self, box1, box2):
         """Check bounding box intersection"""
 
-        x1_max = max(box1[0], box2[0])
-        y1_max = max(box1[1], box2[1])
-        x2_min = min(box1[2], box2[2])
-        y2_min = min(box1[3], box2[3])
+        # Calculate the center (X, Y) of the PPE item
+        box2_center_x = (box2[0] + box2[2]) / 2.0
+        box2_center_y = (box2[1] + box2[3]) / 2.0
 
-        if x2_min < x1_max or y2_min < y1_max:
-            return False
+        # Check if that center point falls within box1 (the Person) boundaries
+        is_inside_x = box1[0] <= box2_center_x <= box1[2]
+        is_inside_y = box1[1] <= box2_center_y <= box1[3]
 
-        return True
+        return bool(is_inside_x and is_inside_y)
 
     def assess_risk(self, detections: List[Dict[str, Any]]) -> str:
         """
