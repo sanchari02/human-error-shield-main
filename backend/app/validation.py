@@ -12,3 +12,4 @@ print(f"Mean Average Precision (mAP@50): {metrics.box.map50:.2f}")
 print(f"Precision: {metrics.box.mp:.2f}")
 print(f"Recall: {metrics.box.mr:.2f}")
 print(f"--------------------------------")
+

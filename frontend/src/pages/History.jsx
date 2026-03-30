@@ -38,25 +38,6 @@ export default function History() {
             </h1>
             <p className="text-gray-400 text-sm mt-1">Review past detections and safety compliance logs.</p>
           </div>
-
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-2.5 text-gray-500" size={16} />
-              <input 
-                type="text" 
-                placeholder="Search logs..." 
-                className="bg-gray-800 border border-gray-700 text-sm rounded-xl pl-9 pr-4 py-2 text-white focus:outline-none focus:border-brand-primary w-64 transition"
-              />
-            </div>
-            
-            <button className="p-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-xl text-gray-400 hover:text-white transition">
-              <Filter size={20} />
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-brand-primary hover:bg-blue-600 text-white rounded-xl font-medium text-sm transition shadow-lg shadow-blue-500/20">
-              <Download size={16} />
-              Export CSV
-            </button>
-          </div>
         </header>
 
         {/* --- Table Section --- */}

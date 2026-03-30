@@ -78,10 +78,10 @@ class YOLOService:
     def predict_image(self, image_bgr: np.ndarray) -> List[Dict[str, Any]]:
         """Run YOLO inference"""
 
-        gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY)
-        image_processed = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+        #gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY)
+        #image_processed = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
 
-        results = self.model(image_processed, conf=self.conf_threshold, verbose=False)
+        results = self.model(image_bgr, conf=self.conf_threshold, verbose=False)
 
         detections = []
 
@@ -124,33 +124,61 @@ class YOLOService:
         """
 
         persons = []
-        violations = []
+        positive_ppe_detections = []
+        violation_detections = []
 
         # Active PPE violation IDs
+        required_ppe_ids = []
         active_violation_ids = []
 
         for ppe, enabled in self.active_classes.items():
             if enabled:
+                # E.g., The ID for "helmet" (positive)
+                required_ppe_ids.append(self.class_map[ppe])
+                # E.g., The ID for "no_helmet" (explicit violation)
                 violation_class = self.violation_map[ppe]
                 active_violation_ids.append(self.class_map[violation_class])
 
-        # Separate detections
+        # 2. Separate detections into buckets
         for d in detections:
-
-            if d["class_id"] == self.person_class_id:
+            cid = d["class_id"]
+            if cid == self.person_class_id:
                 persons.append(d["bbox"])
+            elif cid in required_ppe_ids:
+                positive_ppe_detections.append(d)
+            elif cid in active_violation_ids:
+                violation_detections.append(d["bbox"])
 
-            elif d["class_id"] in active_violation_ids:
-                violations.append(d["bbox"])
-
+        # If no people are in the frame, nothing is at risk
         if not persons:
             return "NO WORKER"
 
-        # Check if any violation overlaps with a person
+        # 3. Assess each person (Guilty until proven innocent)
+        # If ANY person is unsafe, the whole scene is HIGH risk.
         for person_box in persons:
-            for v_box in violations:
-
+            
+            # --- Check A: Did the model explicitly see a violation? ---
+            # (e.g., it specifically detected "no_helmet" overlapping this person)
+            for v_box in violation_detections:
                 if self.check_overlap(person_box, v_box):
                     return "HIGH"
 
+            # --- Check B: Does the person actually have ALL required PPE? ---
+            # If the admin requires Helmet AND Vest, we must find both.
+            for req_ppe_id in required_ppe_ids:
+                has_this_ppe = False
+                
+                # Look through all the positive PPE the AI found in the frame
+                for ppe_d in positive_ppe_detections:
+                    if ppe_d["class_id"] == req_ppe_id:
+                        # Does this PPE physically overlap with this specific person?
+                        if self.check_overlap(person_box, ppe_d["bbox"]):
+                            has_this_ppe = True
+                            break # Great, they have this specific item!
+                
+                # If we checked all detected PPE and didn't find the required item:
+                if not has_this_ppe:
+                    return "HIGH" # Missing equipment! Trigger alarm.
+
+        # 4. If we checked every person, and nobody triggered a HIGH risk, we are safe.
         return "SAFE"

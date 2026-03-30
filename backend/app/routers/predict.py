@@ -83,10 +83,10 @@ class YOLOService:
         """
 
         # Convert to grayscale (your preprocessing)
-        gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY)
-        image_processed = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+     #  gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY)
+     #  image_processed = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
 
-        results = self.model(image_processed, conf=self.conf_threshold, verbose=False)
+        results = self.model(image_bgr, conf=self.conf_threshold, verbose=False)
 
         detections = []
 

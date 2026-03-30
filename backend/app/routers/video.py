@@ -101,7 +101,7 @@ def stream_webcam(service: YOLOService = Depends(get_yolo_service)):
                         if risk == "HIGH":
                             current_time = time.time()
                             # 5-second cooldown
-                            if current_time - last_incident_time > 5.0: 
+                            if current_time - last_incident_time > 25.0: 
                                 last_incident_time = current_time
                                 
                                 # 1. Save Image (with boxes already drawn)

@@ -34,3 +34,5 @@ def get_history():
             logs = json.load(f)
         return JSONResponse(content=logs)
     return JSONResponse(content=[])
+
+    
