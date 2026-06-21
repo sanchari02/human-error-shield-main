@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 35
+names: ['Abdomen', 'Belly', 'Brain', 'Chest', 'Ear', 'Elbow', 'Esophagus', 'Eye', 'Face', 'Foot', 'Hair', 'Heart', 'Kidney', 'Knee', 'Large Intestines', 'Left Hand', 'Leg', 'Lips', 'Liver', 'Lungs', 'Nose', 'Pancreas', 'Rectum', 'Right Hand', 'Shoulder', 'Skull', 'Small Intestines', 'Spinal Cord', 'Stomach', 'Teeth', 'Thigh', 'Thyroid', 'Tongue', 'Urinary Bladder', 'Uvula']
+
+roboflow:
+  workspace: cklive
+  project: body-parts-detection-kqq6b-gttyq
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/cklive/body-parts-detection-kqq6b-gttyq/dataset/1
